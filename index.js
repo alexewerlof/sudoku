@@ -17,12 +17,14 @@ class Checker {
     this.values = [];
   }
 
+  alreadyHaveCh(ch) {
+    return this.values.some( v => v === ch);
+  }
+
   add(ch) {
-    if (ch === ' ') {
-      return;
-    }
-    if (this.values.some( v => v === ch)) {
-      throw `already exists ${ch}`;
+    isValidCh(ch);
+    if (ch !== ' ' && this.alreadyHaveCh(ch)) {
+      throw `"${ch}" already exists`;
     }
     this.values.push(ch);
   }
@@ -48,6 +50,14 @@ class Board {
     }
   }
 
+  findFirstEmptyCell() {
+    throw 'Not implementadeoppp'
+  }
+
+  isAllFull() {
+    throw 'not implemented either'
+  }
+
   toString() {
     var ret = [];
     for (let y = 0;y < 9; y++) {
@@ -57,14 +67,31 @@ class Board {
   }
 
   setCells(...rows) {
+    if (rows.length !== 9) {
+      throw 'Expecting exactly 9 rows';
+    }
     for (let r = 0; r < 9; r++) {
+      let row = rows[r];
+      if (typeof row !== 'string') {
+        throw `Invalid row type ${typeof row}`;
+      }
+      if (row.length !== 9) {
+        throw `"${row}" row must have exactly 9 characters`;
+      }
       for (let x = 0; x < 9; x++) {
-        this.cells[r][x] = rows[r].charAt(x);
+        let ch = row.charAt(x);
+        if (isValidCh(ch)) {
+          this.cells[r][x] = ch;
+        }
       }
     }
   }
 
-  checkLines() {
+  from(anotherBoard) {
+    throw 'Not impl'
+  }
+
+  checkRows() {
     for (let r = 0; r < 9; r++) {
       var checker = new Checker;
       for (let x = 0; x < 9; x++) {
@@ -73,9 +100,43 @@ class Board {
     }
     return true;
   }
+
+  checkColumns() {
+    for (let x = 0; x < 9; x++) {
+      var checker = new Checker;
+      for (let r = 0; r < 9; r++) {
+        checker.add(this.cells[r][x]);
+      }
+    }
+  }
+
+  checkLines() {
+    return this.checkRows() && this.checkColumns();
+  }
+
+  checkHouse(x, y) {
+    var checker = new Checker;
+    for (var xx = 0; xx < 3; xx++) {
+      for (var yy = 0; yy < 3; yy++) {
+        checker.add(this.cells[y + yy][x + xx]);
+      }
+    }
+    return true;
+  }
+
+  checkHouses() {
+    for (x = 0; x < 9; x+=3) {
+      for (y = 0; y < 9; y +=3) {
+        checkHouse(x, y);
+      }
+    }
+  }
+
+  check() {
+    return this.checkLines() && this.checkHouses();
+  }
 }
 
-console.log(isValidCh('11'));
 var b = new Board;
 console.log(b.checkLines());
 b.setCells(
