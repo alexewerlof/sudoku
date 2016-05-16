@@ -9,7 +9,7 @@ class Checker {
   }
 
   add(cell) {
-    this.addVal(cell.value);
+    return this.addVal(cell.value);
   }
   
   addVal(val) {
@@ -167,7 +167,7 @@ class Board {
     for (let y = 0; y < 9; y++) {
       var checker = new Checker;
       for (let x = 0; x < 9; x++) {
-        if (checker.add(this.cells[x][y])) {
+        if (checker.add(this.cells[x][y]) === false) {
           console.warn(`Row ${y} is not good`);
           return false;
         }
@@ -187,10 +187,6 @@ class Board {
       }
     }
     return true;
-  }
-
-  checkLines() {
-    return this.checkRows() && this.checkColumns();
   }
 
   checkHouse(x, y) {
@@ -218,7 +214,7 @@ class Board {
   }
 
   check() {
-    return this.checkLines() && this.checkHouses();
+    return this.checkRows() && this.checkColumns() && this.checkHouses();
   }
   
   solve() {
@@ -229,6 +225,7 @@ class Board {
     }
     if (firstEmptyCellDim) {
       var [x, y] = firstEmptyCellDim;
+      console.log(`Found an empty cell at ${x},${y}`);
       for (let i = 1; i <=9; i++) {
         var newBoard = new Board;
         newBoard.from(this);
@@ -252,7 +249,7 @@ b.setCells(
   ' 8  463 7',
   '6  28    ',
   '5  7  48 ',
-  '2  7  48 ',
+  '2        ',
   '  5 7  4 ',
   '8 1  372 ',
   '  78546  '
