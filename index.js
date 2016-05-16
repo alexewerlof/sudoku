@@ -102,9 +102,9 @@ class Board {
   }
 
   forEveryCell(fn) {
-    for (let y = 0;y < 9; y++) {
-      for (let x = 0; x < 9; x++) {
-        if (fn(this.cells[y][x], x, y)) {
+    for (let x = 0; x < 9; x++) {
+      for (let y = 0;y < 9; y++) {
+        if (fn(this.cells[x][y], x, y) === true) {
           return;
         }
       }
@@ -113,7 +113,7 @@ class Board {
 
   findFirstEmptyCell() {
     var ret;
-    this.forEveryCell(cell, x, y => {
+    this.forEveryCell((cell, x, y) => {
       if (cell.value === 0) {
         ret = [x, y];
         return true;
@@ -127,11 +127,18 @@ class Board {
   }
 
   toString() {
-    var ret = [];
-    for (let y = 0;y < 9; y++) {
-        ret.push(this.cells[y].join(' '));
+    var ret = '';
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        ret += this.cells[x][y].toString() + ' ';
+      }
+      ret += '\n';
     }
-    return ret.join('\n');
+    return ret;
+  }
+  
+  print() {
+    console.log(this.toString());
   }
 
   setCells(...rows) {
@@ -147,20 +154,20 @@ class Board {
         throw `"${row}" row must have exactly 9 characters`;
       }
       for (let x = 0; x < 9; x++) {
-        this.cells[r][x].value = row.charAt(x);
+        this.cells[x][r].value = row.charAt(x);
       }
     }
   }
 
   from(anotherBoard) {
-    throw 'Not impl'
+    this.forEveryCell((cell, x, y) => this.cells[x][y].value = anotherBoard.cells[x][y].value);
   }
 
   checkRows() {
     for (let y = 0; y < 9; y++) {
       var checker = new Checker;
       for (let x = 0; x < 9; x++) {
-        if (checker.add(this.cells[y][x])) {
+        if (checker.add(this.cells[x][y])) {
           console.warn(`Row ${y} is not good`);
           return false;
         }
@@ -173,7 +180,7 @@ class Board {
     for (let x = 0; x < 9; x++) {
       var checker = new Checker;
       for (let y = 0; y < 9; y++) {
-        if (checker.add(this.cells[y][x]) === false) {
+        if (checker.add(this.cells[x][y]) === false) {
           console.warn(`Column ${x} is not good`);
           return false;
         }
@@ -190,7 +197,7 @@ class Board {
     var checker = new Checker;
     for (var xx = 0; xx < 3; xx++) {
       for (var yy = 0; yy < 3; yy++) {
-        if (checker.add(this.cells[y + yy][x + xx]) === 0) {
+        if (checker.add(this.cells[x + xx][y + yy]) === 0) {
           return false;
         }
       }
@@ -213,6 +220,19 @@ class Board {
   check() {
     return this.checkLines() && this.checkHouses();
   }
+  
+  solve() {
+    var firstEmptyCellDim = this.findFirstEmptyCell();
+    if (firstEmptyCellDim) {
+      var newBoard = new Board;
+      newBoard.from(this);
+      var [x, y] = firstEmptyCellDim;
+      newBoard.cells[x][y].value = 1;
+      newBoard.print();
+    } else {
+      console.log('It is already solved');
+    }
+  }
 }
 
 var b = new Board;
@@ -228,4 +248,5 @@ b.setCells(
   '8 1  372 ',
   '  78546  '
 )
-console.log(b.toString());
+b.print();
+b.solve();
