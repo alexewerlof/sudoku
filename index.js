@@ -1,6 +1,10 @@
 class Checker {
 
   constructor() {
+    this.reset();
+  }
+  
+  reset() {
     this.values = [];
   }
 
@@ -165,32 +169,34 @@ class Board {
   }
 
   checkRows() {
+    var checker = new Checker;
     for (let y = 0; y < 9; y++) {
-      var checker = new Checker;
       for (let x = 0; x < 9; x++) {
         if (checker.add(this.cells[x][y]) === false) {
           // console.warn(`Row ${y} is not good`);
           return false;
         }
       }
+      checker.reset();
     }
     return true;
   }
 
   checkColumns() {
+    var checker = new Checker;
     for (let x = 0; x < 9; x++) {
-      var checker = new Checker;
       for (let y = 0; y < 9; y++) {
         if (checker.add(this.cells[x][y]) === false) {
           // console.warn(`Column ${x} is not good`);
           return false;
         }
       }
+      checker.reset();
     }
     return true;
   }
 
-  checkHouse(x, y) {
+  _checkHouse(x, y) {
     var checker = new Checker;
     for (var xx = 0; xx < 3; xx++) {
       for (var yy = 0; yy < 3; yy++) {
@@ -205,7 +211,7 @@ class Board {
   checkHouses() {
     for (let x = 0; x < 9; x+=3) {
       for (let y = 0; y < 9; y +=3) {
-        if (this.checkHouse(x, y) === false) {
+        if (this._checkHouse(x, y) === false) {
           // console.warn(`The house at ${x}, ${y} is faulty`);
           return false;
         }
@@ -233,16 +239,16 @@ class Board {
         newBoard.solve();
       }
     } else {
-      console.log('Solved!');
+      console.log(`Solution #${++solutionCounter}`);
       this.print();
     }
   }
 }
 
+var solutionCounter = 0;
 var b = new Board;
-console.log(b.check());
 b.setCells(
-  '    27  8',
+  '         ',
   ' 3   826 ',
   ' 8  463 7',
   '6  28    ',
@@ -250,7 +256,7 @@ b.setCells(
   '2        ',
   '  5 7  4 ',
   '8 1  372 ',
-  '  78546  '
-)
+  '      6  '
+);
 b.print();
 b.solve();
