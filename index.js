@@ -112,11 +112,18 @@ class Board {
   }
 
   findFirstEmptyCell() {
-    throw 'Not implementadeoppp'
+    var ret;
+    this.forEveryCell(cell, x, y => {
+      if (cell.value === 0) {
+        ret = [x, y];
+        return true;
+      }
+    });
+    return ret;
   }
 
   isAllFull() {
-    throw 'not implemented either'
+    return !!this.findFirstEmptyCell();
   }
 
   toString() {
