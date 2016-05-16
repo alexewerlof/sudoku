@@ -1,51 +1,112 @@
-function isValidCh(ch) {
-  if (typeof ch !== 'string') {
-    throw `Invalid type: ${typeof ch}`;
-  }
-  if (ch.length !== 1) {
-    throw `"${ch}" is not exactly one character`;
-  }
-  if (/[1-9\s]/.test(ch)) {
-    return true;
-  } else {
-    throw `Invalid character: "${ch}"`;
-  }
-}
-
 class Checker {
+
   constructor() {
     this.values = [];
   }
 
-  alreadyHaveCh(ch) {
-    return this.values.some( v => v === ch);
+  has(value) {
+    return this.values.indexOf(value) !== -1;
   }
 
-  add(ch) {
-    isValidCh(ch);
-    if (ch !== ' ' && this.alreadyHaveCh(ch)) {
-      throw `"${ch}" already exists`;
+  add(cell) {
+    this.addVal(cell.value);
+  }
+  
+  addVal(val) {
+    if (this.has(val)) {
+      return false;
     }
-    this.values.push(ch);
+    if (val !== 0) { 
+      this.values.push(val);
+    }
+    return true;
   }
 
   hasAllDigits() {
-    throw 'not implemented';
+    return this.has(1) && this.has(2) && this.has(3) &&
+           this.has(4) && this.has(5) && this.has(6) &&
+           this.has(7) && this.has(8) && this.has(9);
   }
 
   whatIsMissing() {
-    throw 'not implemented 2';
+    var ret = [];
+    if (!this.has(1)) ret.push(1);
+    if (!this.has(2)) ret.push(2);
+    if (!this.has(3)) ret.push(3);
+    if (!this.has(4)) ret.push(4);
+    if (!this.has(5)) ret.push(5);
+    if (!this.has(6)) ret.push(6);
+    if (!this.has(7)) ret.push(7);
+    if (!this.has(8)) ret.push(8);
+    if (!this.has(9)) ret.push(9);
+    return ret;
+  }
+}
+
+class Cell {
+
+  constructor() {
+    this._value = 0;
+  }
+
+  set value(v) {
+    if (typeof v === 'number') {
+      if (v < 0 || v > 9) {
+        throw `Value out of range: ${v}`;
+      } else {
+        this._value = v;
+      }
+    } else if (typeof v === 'string') {
+      this._value = this.fromString(v);
+    } else {
+      throw `Invalid type for setting a cell value: ${typeof v}. ${v}`;
+    }
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  fromString(ch) {
+    switch (ch) {
+      case ' ': return 0;
+      case '1': return 1;
+      case '2': return 2;
+      case '3': return 3;
+      case '4': return 4;
+      case '5': return 5;
+      case '6': return 6;
+      case '7': return 7;
+      case '8': return 8;
+      case '9': return 9;
+      default: throw `Invalid character "${ch}"`;
+    }
+  }
+
+  toString() {
+    return this.value ? String(this.value) : '_';
   }
 }
 
 class Board {
+
   constructor() {
     this.cells = [];
     for (let r = 0;r < 9; r++) {
       let currentRow = [];
-      this.cells.push(currentRow);
       for (let x = 0; x < 9; x++) {
-        currentRow[x] = ' ';
+        currentRow.push(new Cell);
+      }
+      this.cells.push(currentRow);
+    }
+  }
+
+  forEveryCell(fn) {
+    for (let y = 0;y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        if (fn(this.cells[y][x], x, y)) {
+          return;
+        }
       }
     }
   }
@@ -79,10 +140,7 @@ class Board {
         throw `"${row}" row must have exactly 9 characters`;
       }
       for (let x = 0; x < 9; x++) {
-        let ch = row.charAt(x);
-        if (isValidCh(ch)) {
-          this.cells[r][x] = ch;
-        }
+        this.cells[r][x].value = row.charAt(x);
       }
     }
   }
@@ -92,10 +150,13 @@ class Board {
   }
 
   checkRows() {
-    for (let r = 0; r < 9; r++) {
+    for (let y = 0; y < 9; y++) {
       var checker = new Checker;
       for (let x = 0; x < 9; x++) {
-        checker.add(this.cells[r][x]);
+        if (checker.add(this.cells[y][x])) {
+          console.warn(`Row ${y} is not good`);
+          return false;
+        }
       }
     }
     return true;
@@ -104,10 +165,14 @@ class Board {
   checkColumns() {
     for (let x = 0; x < 9; x++) {
       var checker = new Checker;
-      for (let r = 0; r < 9; r++) {
-        checker.add(this.cells[r][x]);
+      for (let y = 0; y < 9; y++) {
+        if (checker.add(this.cells[y][x]) === false) {
+          console.warn(`Column ${x} is not good`);
+          return false;
+        }
       }
     }
+    return true;
   }
 
   checkLines() {
@@ -118,18 +183,24 @@ class Board {
     var checker = new Checker;
     for (var xx = 0; xx < 3; xx++) {
       for (var yy = 0; yy < 3; yy++) {
-        checker.add(this.cells[y + yy][x + xx]);
+        if (checker.add(this.cells[y + yy][x + xx]) === 0) {
+          return false;
+        }
       }
     }
     return true;
   }
 
   checkHouses() {
-    for (x = 0; x < 9; x+=3) {
-      for (y = 0; y < 9; y +=3) {
-        checkHouse(x, y);
+    for (let x = 0; x < 9; x+=3) {
+      for (let y = 0; y < 9; y +=3) {
+        if (this.checkHouse(x, y) === false) {
+          console.warn(`The house at ${x}, ${y} is faulty`);
+          return false;
+        }
       }
     }
+    return true;
   }
 
   check() {
@@ -138,7 +209,7 @@ class Board {
 }
 
 var b = new Board;
-console.log(b.checkLines());
+console.log(b.check());
 b.setCells(
   '    27  8',
   ' 3   826 ',
