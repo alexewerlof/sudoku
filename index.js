@@ -45,8 +45,8 @@ class Checker {
 
 class Cell {
 
-  constructor() {
-    this._value = 0;
+  constructor(init = 0) {
+    this.value = init;
   }
 
   set value(v) {
@@ -57,7 +57,7 @@ class Cell {
         this._value = v;
       }
     } else if (typeof v === 'string') {
-      this._value = this.fromString(v);
+      this._value = this._fromString(v);
     } else {
       throw `Invalid type for setting a cell value: ${typeof v}. ${v}`;
     }
@@ -67,7 +67,7 @@ class Cell {
     return this._value;
   }
 
-  fromString(ch) {
+  _fromString(ch) {
     switch (ch) {
       case ' ': return 0;
       case '1': return 1;
@@ -90,14 +90,19 @@ class Cell {
 
 class Board {
 
-  constructor() {
-    this.cells = [];
-    for (let r = 0;r < 9; r++) {
-      let currentRow = [];
-      for (let x = 0; x < 9; x++) {
-        currentRow.push(new Cell);
+  constructor(anotherBoard) {
+    if (anotherBoard) {
+      this.cells = [[],[],[],[],[],[],[],[],[]];
+      this.forEveryCell((cell, x, y) => this.cells[x][y] = anotherBoard.cells[x][y]);
+    } else {
+      this.cells = [];
+      for (let y = 0; y < 9; y++) {
+        let currentRow = [];
+        for (let x = 0; x < 9; x++) {
+          currentRow.push(new Cell);
+        }
+        this.cells.push(currentRow);
       }
-      this.cells.push(currentRow);
     }
   }
 
@@ -157,10 +162,6 @@ class Board {
         this.cells[x][r].value = row.charAt(x);
       }
     }
-  }
-
-  from(anotherBoard) {
-    this.forEveryCell((cell, x, y) => this.cells[x][y].value = anotherBoard.cells[x][y].value);
   }
 
   checkRows() {
@@ -227,9 +228,8 @@ class Board {
       var [x, y] = firstEmptyCellDim;
       // console.log(`Found an empty cell at ${x},${y}`);
       for (let i = 1; i <=9; i++) {
-        var newBoard = new Board;
-        newBoard.from(this);
-        newBoard.cells[x][y].value = i;
+        var newBoard = new Board(this);
+        newBoard.cells[x][y] = new Cell(i);
         newBoard.solve();
       }
     } else {
