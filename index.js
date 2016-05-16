@@ -223,12 +223,21 @@ class Board {
   
   solve() {
     var firstEmptyCellDim = this.findFirstEmptyCell();
+    if (!this.check()) {
+      console.log('Rules do not check. Quitting.');
+      return;
+    }
     if (firstEmptyCellDim) {
-      var newBoard = new Board;
-      newBoard.from(this);
       var [x, y] = firstEmptyCellDim;
-      newBoard.cells[x][y].value = 1;
-      newBoard.print();
+      for (let i = 1; i <=9; i++) {
+        var newBoard = new Board;
+        newBoard.from(this);
+        newBoard.cells[x][y].value = i;
+        if (newBoard.check()) {
+          newBoard.print();
+          newBoard.solve();
+        }
+      }
     } else {
       console.log('It is already solved');
     }
