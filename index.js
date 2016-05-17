@@ -248,7 +248,7 @@ class Board {
 var solutionCounter = 0;
 var b = new Board;
 b.setCells(
-  '         ',
+  '956      ',
   ' 3   826 ',
   ' 8  463 7',
   '6  28    ',
@@ -256,7 +256,7 @@ b.setCells(
   '2        ',
   '  5 7  4 ',
   '8 1  372 ',
-  '      6  '
+  '729   6  '
 );
 b.print();
 b.solve();
